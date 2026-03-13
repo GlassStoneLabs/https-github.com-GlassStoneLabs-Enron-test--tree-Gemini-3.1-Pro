@@ -306,14 +306,13 @@ export default function App() {
                 {/* Right Column: Corporate Actions & Logs */}
                 <div className="space-y-6 flex flex-col h-full">
                     <section className="bg-slate-900 border border-slate-800 rounded-lg p-4 shadow-xl">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                <ShieldAlert className="w-4 h-4" />
-                                Damage Control
-                            </h2>
-                            <div className="text-xs text-red-400 font-bold bg-red-950/50 px-2 py-1 rounded border border-red-900/50">
-                                SEC HEAT: {state.evasionCount}
-                            </div>
+                        <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <ShieldAlert className="w-4 h-4" />
+                            Damage Control
+                        </h2>
+                        
+                        <div className="mb-6">
+                            <Meter label="SEC Heat Level" value={state.evasionCount} max={10} dangerThreshold={0.7} warningThreshold={0.4} color="bg-yellow-500" />
                         </div>
                         
                         <div className="space-y-3">
