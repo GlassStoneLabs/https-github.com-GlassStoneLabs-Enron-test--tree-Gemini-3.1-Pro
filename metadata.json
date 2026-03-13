@@ -1,0 +1,5 @@
+{
+  "name": "Enron Meltdown Manager",
+  "description": "A historically accurate simulation game based on the Enron scandal. Manage a nuclear reactor to manipulate the California energy grid, hide debt in SPEs, and avoid the SEC.",
+  "requestFramePermissions": []
+}
