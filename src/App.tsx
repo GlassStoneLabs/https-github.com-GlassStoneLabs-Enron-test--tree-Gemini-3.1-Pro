@@ -61,24 +61,31 @@ export default function App() {
                     }
                     break;
                 case 'LOBBY':
-                    if (next.cash >= PRICES.LOBBY) {
-                        next.cash -= PRICES.LOBBY;
+                    const lCost = PRICES.LOBBY * Math.pow(1.5, next.evasionCount);
+                    const lEffect = 15 * Math.pow(0.8, next.evasionCount);
+                    if (next.cash >= lCost) {
+                        next.cash -= lCost;
                         next.lobbyingShieldTime += 30; // 30 ticks of protection
-                        next.auditRisk = Math.max(0, next.auditRisk - 15);
-                        addLog("Lobbied Washington. Audit risk reduced.", "success");
+                        next.auditRisk = Math.max(0, next.auditRisk - lEffect);
+                        next.evasionCount += 1;
+                        addLog(`Lobbied Washington. Audit risk reduced by ${lEffect.toFixed(1)}. SEC Heat increased.`, "success");
                     } else {
                         addLog("Not enough cash to lobby.", "warning");
                     }
                     break;
                 case 'SHRED':
-                    if (next.cash >= PRICES.SHRED) {
-                        next.cash -= PRICES.SHRED;
-                        if (Math.random() < 0.1) {
+                    const sCost = PRICES.SHRED * Math.pow(1.5, next.evasionCount);
+                    const sEffect = 40 * Math.pow(0.8, next.evasionCount);
+                    const sRisk = Math.min(0.8, 0.1 + (next.evasionCount * 0.08));
+                    if (next.cash >= sCost) {
+                        next.cash -= sCost;
+                        next.evasionCount += 1;
+                        if (Math.random() < sRisk) {
                             next.auditRisk += 50;
-                            addLog("WHISTLEBLOWER! Shredding discovered by SEC.", "danger");
+                            addLog(`WHISTLEBLOWER! Shredding discovered by SEC. (Risk was ${(sRisk*100).toFixed(0)}%)`, "danger");
                         } else {
-                            next.auditRisk = Math.max(0, next.auditRisk - 40);
-                            addLog("Documents shredded successfully.", "success");
+                            next.auditRisk = Math.max(0, next.auditRisk - sEffect);
+                            addLog(`Documents shredded successfully. Audit risk reduced by ${sEffect.toFixed(1)}. SEC Heat increased.`, "success");
                         }
                     } else {
                         addLog("Not enough cash to shred.", "warning");
@@ -96,6 +103,12 @@ export default function App() {
     const handleControl = (control: 'rods' | 'valve', value: number) => {
         setState(prev => ({ ...prev, [control]: value }));
     };
+
+    const currentLobbyCost = PRICES.LOBBY * Math.pow(1.5, state.evasionCount);
+    const currentShredCost = PRICES.SHRED * Math.pow(1.5, state.evasionCount);
+    const currentLobbyEffect = 15 * Math.pow(0.8, state.evasionCount);
+    const currentShredEffect = 40 * Math.pow(0.8, state.evasionCount);
+    const currentShredRisk = Math.min(0.8, 0.1 + (state.evasionCount * 0.08));
 
     if (state.gameOver) {
         return (
@@ -293,29 +306,43 @@ export default function App() {
                 {/* Right Column: Corporate Actions & Logs */}
                 <div className="space-y-6 flex flex-col h-full">
                     <section className="bg-slate-900 border border-slate-800 rounded-lg p-4 shadow-xl">
-                        <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                            <ShieldAlert className="w-4 h-4" />
-                            Damage Control
-                        </h2>
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                <ShieldAlert className="w-4 h-4" />
+                                Damage Control
+                            </h2>
+                            <div className="text-xs text-red-400 font-bold bg-red-950/50 px-2 py-1 rounded border border-red-900/50">
+                                SEC HEAT: {state.evasionCount}
+                            </div>
+                        </div>
                         
                         <div className="space-y-3">
                             <button 
                                 onClick={() => handleAction('LOBBY')}
-                                disabled={state.cash < PRICES.LOBBY}
+                                disabled={state.cash < currentLobbyCost}
                                 className="w-full flex items-center justify-between p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                <span className="flex items-center gap-2"><Shield className="w-4 h-4 text-blue-400" /> Lobby Washington</span>
-                                <span className="text-xs text-slate-400">-${PRICES.LOBBY}</span>
+                                <div className="flex flex-col items-start">
+                                    <span className="flex items-center gap-2"><Shield className="w-4 h-4 text-blue-400" /> Lobby Washington</span>
+                                    <span className="text-[10px] text-slate-500 mt-1">Reduces risk by {currentLobbyEffect.toFixed(1)}</span>
+                                </div>
+                                <span className="text-xs text-slate-400">-${currentLobbyCost.toFixed(0)}</span>
                             </button>
                             
                             <button 
                                 onClick={() => handleAction('SHRED')}
-                                disabled={state.cash < PRICES.SHRED}
+                                disabled={state.cash < currentShredCost}
                                 className="w-full flex items-center justify-between p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                <span className="flex items-center gap-2"><FileText className="w-4 h-4 text-slate-400" /> Shred Documents</span>
-                                <span className="text-xs text-slate-400">-${PRICES.SHRED}</span>
+                                <div className="flex flex-col items-start">
+                                    <span className="flex items-center gap-2"><FileText className="w-4 h-4 text-slate-400" /> Shred Documents</span>
+                                    <span className="text-[10px] text-slate-500 mt-1">Reduces risk by {currentShredEffect.toFixed(1)} | {(currentShredRisk*100).toFixed(0)}% fail chance</span>
+                                </div>
+                                <span className="text-xs text-slate-400">-${currentShredCost.toFixed(0)}</span>
                             </button>
+                        </div>
+                        <div className="mt-3 text-[10px] text-slate-500 text-center italic">
+                            Each evasion increases SEC Heat, raising future costs and reducing effectiveness.
                         </div>
                     </section>
 

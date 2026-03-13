@@ -85,6 +85,7 @@ export interface GameState {
     // Meta
     difficulty: Difficulty;
     currentChapter: number;
+    evasionCount: number;
 }
 
 export interface LogEvent {

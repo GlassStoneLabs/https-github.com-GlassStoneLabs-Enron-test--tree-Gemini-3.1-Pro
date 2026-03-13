@@ -88,6 +88,10 @@ export function tick(state: GameState, addLog: (msg: string, type: LogEvent['typ
         }
     }
     
+    // Passive SEC Scrutiny (increases with hidden debt and past evasions)
+    const passiveAuditIncrease = (next.totalHiddenDebt / 25000) * CHAPTERS[next.currentChapter].modifiers.regulatorAggression * (1 + next.evasionCount * 0.2);
+    next.auditRisk = Math.min(100, next.auditRisk + passiveAuditIncrease);
+    
     // Operating costs
     const costs = (flowRate * 0.05) + (next.totalHiddenDebt * 0.001);
     next.cash += (revenue - costs);

@@ -182,5 +182,6 @@ export const INITIAL_STATE: GameState = {
     artificialShortage: false,
     difficulty: 1,
     currentChapter: 0,
-    lastDividendWeek: 0
+    lastDividendWeek: 0,
+    evasionCount: 0
 };
